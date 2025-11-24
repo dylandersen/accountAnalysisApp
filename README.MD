@@ -1,10 +1,10 @@
 # Account Analysis App
 
-AI-powered Lightning App Page that provides comprehensive account intelligence, relationship health analysis, and company research for Salesforce Accounts.
+Agentforce-powered Lightning App Page that provides comprehensive account intelligence, relationship health analysis, and company research for Salesforce Accounts.
 
 ## Features
 
-- 🤖 **AI-Powered Health Scoring** - Automated 0-100 health score with status levels (Excellent, Good, Moderate, At Risk, Critical)
+- 🤖 **Agentforce-Powered Health Scoring** - Automated 0-100 health score with status levels (Excellent, Good, Moderate, At Risk, Critical)
 - 📊 **Relationship Health Analysis** - Sentiment analysis of customer communications with actionable insights
 - 🔍 **Company Research** - Web-based company intelligence via Tavily API (overview, industry, products, executives, news)
 - 📈 **Comprehensive Metrics** - Tracks emails, tasks, cases, opportunities, and engagement patterns
@@ -16,7 +16,7 @@ AI-powered Lightning App Page that provides comprehensive account intelligence, 
 - Salesforce CLI installed and authenticated
 - System Administrator permissions
 - [Tavily API Key](https://tavily.com) (for company research)
-- Einstein AI enabled in your org (OpenAI GPT-4o mini and Vertex AI Gemini)
+- Einstein AI enabled in your org (OpenAI GPT-4o mini and Gemini 2.5 Pro)
 
 ## Quick Start
 
