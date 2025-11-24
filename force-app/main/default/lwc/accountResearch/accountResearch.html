@@ -1,0 +1,260 @@
+<template>
+  <lightning-card>
+    <div slot="title">
+      <div class="custom-header">
+        <div class="icon-container">
+          <lightning-icon
+            icon-name="utility:company"
+            size="small"
+            class="header-icon"
+          ></lightning-icon>
+        </div>
+        <div class="title-container">
+          <h2 class="card-title">Account Research</h2>
+          <div class="powered-by">Powered by <b>Agentforce ✨</b></div>
+        </div>
+      </div>
+    </div>
+    <div slot="actions">
+      <lightning-button
+        label="✨"
+        title="Research with AI"
+        onclick={handleResearch}
+        disabled={isLoading}
+        variant="neutral"
+        class="refresh-button"
+      ></lightning-button>
+    </div>
+
+    <div class="slds-p-around_medium">
+      <!-- Loading State -->
+      <template lwc:if={isLoading}>
+        <div class="loading-container">
+          <img src={agentforceIcon} alt="Agentforce" class="agentforce-icon" />
+          <div class="spinner"></div>
+          <p class="loading-text">{currentLoadingMessage}</p>
+        </div>
+      </template>
+
+      <!-- Empty State -->
+      <template lwc:if={showEmptyState}>
+        <div class="slds-text-align_center slds-p-around_large">
+          <p class="slds-text-heading_small empty-state-text">
+            Click the ✨ button to ask Agentforce to research this account.
+          </p>
+        </div>
+      </template>
+
+      <!-- Error State -->
+      <template lwc:if={hasError}>
+        <div class="slds-box slds-theme_error slds-m-bottom_medium">
+          <p class="slds-text-color_error">{errorMessage}</p>
+        </div>
+      </template>
+
+      <!-- Results -->
+      <template lwc:if={hasData}>
+        <!-- Overview -->
+        <div class="section">
+          <h3 class="section-title">Company Overview</h3>
+          <p class="overview">{data.overview}</p>
+        </div>
+
+        <!-- Snapshot Grid -->
+        <div class="section">
+          <h3 class="section-title">Company Snapshot</h3>
+          <div class="snapshot-grid">
+            <!-- Row 1 -->
+            <template lwc:if={data.facts.industry}>
+              <div class="snapshot-card">
+                <div class="label">Industry</div>
+                <div class="value">{data.facts.industry}</div>
+              </div>
+            </template>
+            <template lwc:if={data.facts.headquarters}>
+              <div class="snapshot-card">
+                <div class="label">Headquarters</div>
+                <div class="value">{data.facts.headquarters}</div>
+              </div>
+            </template>
+            <template lwc:if={data.facts.foundedYear}>
+              <div class="snapshot-card">
+                <div class="label">Founded</div>
+                <div class="value">{data.facts.foundedYear}</div>
+              </div>
+            </template>
+            <template lwc:if={data.facts.employeeCountRange}>
+              <div class="snapshot-card">
+                <div class="label">Employees</div>
+                <div class="value">{data.facts.employeeCountRange}</div>
+              </div>
+            </template>
+
+            <!-- Row 2 - New Sales Intelligence Cards -->
+            <template lwc:if={data.facts.keyProducts}>
+              <div class="snapshot-card">
+                <div class="label">Key Products/Services</div>
+                <div class="value">{data.facts.keyProducts}</div>
+              </div>
+            </template>
+            <template lwc:if={data.facts.targetMarket}>
+              <div class="snapshot-card">
+                <div class="label">Target Market</div>
+                <div class="value">{data.facts.targetMarket}</div>
+              </div>
+            </template>
+            <template lwc:if={data.facts.keyExecutives}>
+              <div class="snapshot-card">
+                <div class="label">Key Executives</div>
+                <div class="value">{data.facts.keyExecutives}</div>
+              </div>
+            </template>
+            <template lwc:if={data.facts.website}>
+              <div class="snapshot-card">
+                <div class="label">Website</div>
+                <div class="value">
+                  <a href={websiteHref} target="_blank" rel="noopener"
+                    >{data.facts.website}</a
+                  >
+                </div>
+              </div>
+            </template>
+          </div>
+        </div>
+
+        <!-- Intelligence Section -->
+        <template lwc:if={data.facts.recentNews}>
+          <div class="section">
+            <div class="intelligence-card news-card">
+              <div class="intelligence-label">Recent News</div>
+              <template lwc:if={data.facts.recentNewsUrl}>
+                <div class="intelligence-value">
+                  <a
+                    href={data.facts.recentNewsUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="news-link"
+                  >
+                    {data.facts.recentNews}
+                  </a>
+                </div>
+              </template>
+              <template lwc:elseif={data.facts.recentNews}>
+                <div class="intelligence-value">{data.facts.recentNews}</div>
+              </template>
+            </div>
+          </div>
+        </template>
+
+        <template lwc:if={data.facts.growthIndicators}>
+          <div class="section">
+            <div class="intelligence-card growth-card">
+              <div class="intelligence-label">Growth Indicators</div>
+              <div class="intelligence-value">
+                {data.facts.growthIndicators}
+              </div>
+            </div>
+          </div>
+        </template>
+
+        <!-- Quick Links -->
+        <template lwc:if={hasAnyLink}>
+          <div class="links">
+            <template lwc:if={data.links.websiteUrl}>
+              <lightning-button-icon
+                icon-name="utility:link"
+                alternative-text="Website"
+                title="Website"
+                onclick={openWebsite}
+              ></lightning-button-icon>
+            </template>
+            <template lwc:if={data.links.linkedinUrl}>
+              <lightning-button-icon
+                icon-name="utility:company"
+                alternative-text="LinkedIn"
+                title="LinkedIn"
+                onclick={openLinkedIn}
+              ></lightning-button-icon>
+            </template>
+            <template lwc:if={data.links.newsSearchUrl}>
+              <lightning-button-icon
+                icon-name="utility:news"
+                alternative-text="News"
+                title="News"
+                onclick={openNews}
+              ></lightning-button-icon>
+            </template>
+            <lightning-button-icon
+              icon-name="utility:slack"
+              alternative-text="Share to Slack"
+              title="Share to Slack"
+              onclick={shareToSlack}
+            ></lightning-button-icon>
+          </div>
+        </template>
+
+        <!-- Headlines -->
+        <template lwc:if={data.headlines.length}>
+          <div class="section">
+            <h3 class="section-title">Recent Headlines</h3>
+            <ul class="headlines">
+              <template for:each={data.headlines} for:item="headline">
+                <li key={headline.title} class="headline">
+                  <template lwc:if={headline.url}>
+                    <a
+                      href={headline.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      class="headline-link"
+                    >
+                      {headline.title}
+                    </a>
+                  </template>
+                  <template lwc:elseif={headline.title}>
+                    {headline.title}
+                  </template>
+                </li>
+              </template>
+            </ul>
+          </div>
+        </template>
+
+        <!-- Save Button -->
+        <div class="save-button-container">
+          <lightning-button
+            label="Save to Record"
+            title="Save account research to Account record"
+            variant="brand"
+            icon-name="utility:save"
+            onclick={handleSaveToRecord}
+            disabled={isSaving}
+            class="save-button"
+          ></lightning-button>
+        </div>
+
+        <!-- AI Disclaimer -->
+        <div class="slds-m-top_medium">
+          <div
+            class="slds-scoped-notification slds-media slds-media_center ai-disclaimer"
+            role="status"
+          >
+            <div class="slds-media__figure">
+              <lightning-icon
+                icon-name="utility:info"
+                size="x-small"
+                class="disclaimer-icon"
+              ></lightning-icon>
+            </div>
+            <div class="slds-media__body">
+              <p class="disclaimer-text">
+                Agentforce uses generative AI, which can include inaccurate or
+                harmful responses. Before sharing externally, review the output
+                for accuracy and safety.
+              </p>
+            </div>
+          </div>
+        </div>
+      </template>
+    </div>
+  </lightning-card>
+</template>

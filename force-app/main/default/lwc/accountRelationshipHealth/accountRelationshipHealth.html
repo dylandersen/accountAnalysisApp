@@ -1,0 +1,326 @@
+<template>
+  <lightning-card>
+    <div slot="title">
+      <div class="custom-header">
+        <div class="icon-container">
+          <lightning-icon
+            icon-name="utility:calculated_insights"
+            size="small"
+            class="header-icon"
+          >
+          </lightning-icon>
+        </div>
+        <div class="title-container">
+          <h2 class="card-title">Relationship Health</h2>
+          <div class="powered-by">Powered by <b>Agentforce ✨</b></div>
+        </div>
+      </div>
+    </div>
+    <div slot="actions">
+      <lightning-button
+        label="✨"
+        title="AI-Powered Refresh"
+        onclick={handleRefresh}
+        disabled={isLoading}
+        variant="neutral"
+        class="refresh-button"
+      >
+      </lightning-button>
+    </div>
+
+    <div class="slds-p-around_medium">
+      <!-- Loading State -->
+      <template lwc:if={isLoading}>
+        <div class="loading-container">
+          <img src={agentforceIcon} alt="Agentforce" class="agentforce-icon" />
+          <div class="spinner"></div>
+          <p class="loading-text">Analyzing with Agentforce...</p>
+        </div>
+      </template>
+
+      <!-- Empty State -->
+      <template lwc:if={showEmptyState}>
+        <div class="slds-text-align_center slds-p-around_large">
+          <p class="slds-text-heading_small empty-state-text">
+            Click the ✨ button to let Agentforce analyze the Relationship
+            Health of this account
+          </p>
+        </div>
+      </template>
+
+      <!-- Error State -->
+      <template lwc:if={hasError}>
+        <div class="slds-box slds-theme_error slds-m-bottom_medium">
+          <p class="slds-text-color_error">{errorMessage}</p>
+        </div>
+      </template>
+
+      <!-- Health Status Section - Modern Design -->
+      <template lwc:if={hasData}>
+        <div class="health-overview-container slds-m-bottom_large">
+          <!-- Left: Circular Progress Gauge -->
+          <div class="health-gauge-section">
+            <div class="gauge-wrapper">
+              <div class="circular-progress-container">
+                <svg
+                  class="circular-progress"
+                  width="160"
+                  height="160"
+                  viewBox="0 0 160 160"
+                >
+                  <!-- Background circle -->
+                  <circle
+                    cx="80"
+                    cy="80"
+                    r="70"
+                    fill="none"
+                    stroke="#e5e5e5"
+                    stroke-width="8"
+                  ></circle>
+                  <!-- Progress circle -->
+                  <circle
+                    cx="80"
+                    cy="80"
+                    r="70"
+                    fill="none"
+                    stroke={scoreColor}
+                    stroke-width="8"
+                    stroke-linecap="round"
+                    stroke-dasharray={progressDashArray}
+                    stroke-dashoffset={progressDashOffset}
+                    transform="rotate(-90 80 80)"
+                    class="progress-ring"
+                  ></circle>
+                </svg>
+                <div class="gauge-content">
+                  <div class="score-large">{healthData.score}</div>
+                  <div class="score-denominator">/100</div>
+                </div>
+              </div>
+              <div class="gauge-label">
+                <div>RELATIONSHIP</div>
+                <div>SCORE</div>
+              </div>
+              <!-- Score Tooltip -->
+              <div class="score-tooltip">
+                <div class="tooltip-header">
+                  <lightning-icon
+                    icon-name="utility:info_alt"
+                    size="xx-small"
+                    class="tooltip-icon"
+                  ></lightning-icon>
+                  <span>How is this score calculated?</span>
+                </div>
+                <div class="tooltip-content">
+                  Agentforce analyzes quantitative metrics (emails, meetings,
+                  cases, opportunities, and more) as well as qualitative signals
+                  from customer sentiment to assess relationship health.
+                  Available communication patterns, customer tone, and
+                  engagement trends are also used to generate this score.
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right: Status and Trend -->
+          <div class="health-details-section">
+            <div class="status-card">
+              <div class="status-header">Status</div>
+              <div class={healthStatusClass} data-class="health-status-modern">
+                <span class="status-emoji-large">{healthEmoji}</span>
+                <span class="status-text-large">{healthData.healthStatus}</span>
+              </div>
+            </div>
+
+            <div class="trend-card">
+              <div class="trend-header">Trend</div>
+              <div class={trendClass} data-class="health-trend-modern">
+                <lightning-icon
+                  icon-name={trendIcon}
+                  size="small"
+                  class="trend-icon"
+                ></lightning-icon>
+                <span class="trend-text">{healthData.trend}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Engagement Metrics Grid -->
+        <div class="slds-m-bottom_medium">
+          <h3 class="slds-text-heading_small slds-m-bottom_x-small">
+            📊 Engagements (Last 90 Days)
+          </h3>
+          <div class="metrics-grid">
+            <div class="metric-card">
+              <lightning-icon
+                icon-name="standard:email"
+                size="small"
+              ></lightning-icon>
+              <div class="metric-value">{metrics.emailCount}</div>
+              <div class="metric-label">Emails</div>
+            </div>
+            <div class="metric-card">
+              <lightning-icon
+                icon-name="standard:task"
+                size="small"
+              ></lightning-icon>
+              <div class="metric-value">{metrics.taskCount}</div>
+              <div class="metric-label">Tasks</div>
+            </div>
+            <div class="metric-card">
+              <lightning-icon
+                icon-name="standard:event"
+                size="small"
+              ></lightning-icon>
+              <div class="metric-value">{metrics.eventCount}</div>
+              <div class="metric-label">Meetings</div>
+            </div>
+            <div class="metric-card">
+              <lightning-icon
+                icon-name="standard:call"
+                size="small"
+              ></lightning-icon>
+              <div class="metric-value">{metrics.callCount}</div>
+              <div class="metric-label">Calls</div>
+            </div>
+            <div class="metric-card-wrapper">
+              <div class="metric-card">
+                <lightning-icon
+                  icon-name="standard:case"
+                  size="small"
+                ></lightning-icon>
+                <div class="metric-value">{caseTotalCount}</div>
+                <div class="metric-label">Cases</div>
+              </div>
+              <!-- Cases Tooltip -->
+              <div class="case-tooltip">
+                <div class="tooltip-header">
+                  <lightning-icon
+                    icon-name="utility:info_alt"
+                    size="xx-small"
+                    class="tooltip-icon"
+                  ></lightning-icon>
+                  <span>Case Details</span>
+                </div>
+                <div class="tooltip-content">
+                  <div class="case-detail-row">
+                    <span class="case-detail-label">Open Cases:</span>
+                    <span class="case-detail-value">{caseOpenCount}</span>
+                  </div>
+                  <div class="case-detail-row">
+                    <span class="case-detail-label">Closed Cases:</span>
+                    <span class="case-detail-value">{caseClosedCount}</span>
+                  </div>
+                  <div class="case-detail-row">
+                    <span class="case-detail-label">Total Cases:</span>
+                    <span class="case-detail-value">{caseTotalCount}</span>
+                  </div>
+                  <template lwc:if={showHighPriorityWarning}>
+                    <div class="case-warning">
+                      <lightning-icon
+                        icon-name="utility:warning"
+                        size="xx-small"
+                        class="warning-icon"
+                      ></lightning-icon>
+                      <span
+                        >There are {caseHighPriorityOpen} high priority cases
+                        that are still open and pending.</span
+                      >
+                    </div>
+                  </template>
+                </div>
+              </div>
+            </div>
+            <div class="metric-card">
+              <lightning-icon
+                icon-name="standard:opportunity"
+                size="small"
+              ></lightning-icon>
+              <div class="metric-value">{metrics.oppCount}</div>
+              <div class="metric-label">Opportunities</div>
+            </div>
+            <div class="metric-card">
+              <lightning-icon
+                icon-name="custom:custom17"
+                size="small"
+              ></lightning-icon>
+              <div class="metric-value">{closedWonACVFormatted}</div>
+              <div class="metric-label">Closed-Won ACV</div>
+            </div>
+            <div class="metric-card">
+              <lightning-icon
+                icon-name="custom:custom82"
+                size="small"
+              ></lightning-icon>
+              <div class="metric-value">{closedLostACVFormatted}</div>
+              <div class="metric-label">Closed-Lost ACV</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Key Insights Section -->
+        <template lwc:if={healthData.keyInsights.length}>
+          <div class="slds-m-bottom_medium">
+            <h3 class="slds-text-heading_small slds-m-bottom_x-small">
+              💡 Key Insights
+            </h3>
+            <ul class="slds-list_dotted">
+              <template for:each={healthData.keyInsights} for:item="insight">
+                <li key={insight} class="insight-item">
+                  <lightning-formatted-rich-text
+                    value={insight}
+                  ></lightning-formatted-rich-text>
+                </li>
+              </template>
+            </ul>
+          </div>
+        </template>
+
+        <!-- Recommended Actions Section -->
+        <template lwc:if={healthData.recommendedActions.length}>
+          <div>
+            <h3 class="slds-text-heading_small slds-m-bottom_x-small">
+              🎯 Recommended Actions
+            </h3>
+            <ul class="slds-list_dotted">
+              <template
+                for:each={healthData.recommendedActions}
+                for:item="action"
+              >
+                <li key={action} class="action-item">
+                  <lightning-formatted-rich-text
+                    value={action}
+                  ></lightning-formatted-rich-text>
+                </li>
+              </template>
+            </ul>
+          </div>
+        </template>
+
+        <!-- AI Disclaimer -->
+        <div class="slds-m-top_medium">
+          <div
+            class="slds-scoped-notification slds-media slds-media_center ai-disclaimer"
+            role="status"
+          >
+            <div class="slds-media__figure">
+              <lightning-icon
+                icon-name="utility:info"
+                size="x-small"
+                class="disclaimer-icon"
+              ></lightning-icon>
+            </div>
+            <div class="slds-media__body">
+              <p class="disclaimer-text">
+                Agentforce uses generative AI, which can include inaccurate or
+                harmful responses. Before sharing externally, review the output
+                for accuracy and safety.
+              </p>
+            </div>
+          </div>
+        </div>
+      </template>
+    </div>
+  </lightning-card>
+</template>

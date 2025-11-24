@@ -1,0 +1,169 @@
+<template>
+  <div class="app-container">
+    <!-- SLDS2 Card-Style Header with Rounded Corners -->
+    <lightning-card class="header-card">
+      <div class="header-card-content">
+        <div class="header-content">
+        <!-- Left Side: Title and Description -->
+        <div class="header-left">
+          <div class="slds-media">
+            <div class="slds-media__figure">
+              <div class="header-icon-container">
+                <lightning-icon
+                  icon-name="standard:account"
+                  size="large"
+                  class="header-icon"
+                ></lightning-icon>
+              </div>
+            </div>
+            <div class="slds-media__body">
+              <h1 class="header-title">Account Analysis</h1>
+              <p class="header-subtitle">
+                Get instant insights into the selected account, <strong>powered by Agentforce ✨</strong>
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Side: Instructions - Centered -->
+        <div class="header-right">
+          <div class="instructions-box">
+            <div class="instructions-header">
+              <lightning-icon
+                icon-name="utility:info"
+                size="x-small"
+                class="instructions-header-icon"
+              ></lightning-icon>
+              <span class="instructions-title"> Quick Start</span>
+            </div>
+            <div class="instructions-content">
+              <div class="instruction-item">
+                <lightning-icon
+                  icon-name="utility:search"
+                  size="xx-small"
+                  class="instruction-bullet"
+                ></lightning-icon>
+                <span>Pick an account below</span>
+              </div>
+              <div class="instruction-item">
+                <lightning-icon
+                  icon-name="utility:agent_astro"
+                  size="xx-small"
+                  class="instruction-bullet"
+                ></lightning-icon>
+                <span>Agentforce's analysis starts automatically ✨</span>
+              </div>
+              <div class="instruction-item">
+                <lightning-icon
+                  icon-name="utility:magicwand"
+                  size="xx-small"
+                  class="instruction-bullet"
+                ></lightning-icon>
+                <span>Explore insights in seconds!</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Account Selection - Centered -->
+      <div class="account-selection-container">
+        <div class="account-picker-wrapper">
+          <lightning-record-picker
+            label="Select Account"
+            placeholder="Search for an account to analyze..."
+            object-api-name="Account"
+            value={selectedAccountId}
+            onchange={handleAccountChange}
+            class="account-picker"
+          ></lightning-record-picker>
+        </div>
+      </div>
+
+      <!-- What This Does Section -->
+      <div class="features-grid">
+        <div class="feature-box">
+          <div class="slds-media">
+            <div class="slds-media__figure">
+              <div class="feature-icon-wrapper">
+                <lightning-icon
+                  icon-name="utility:trending"
+                  size="small"
+                  class="feature-icon"
+                ></lightning-icon>
+              </div>
+            </div>
+            <div class="slds-media__body">
+              <h3 class="feature-title">Relationship Health</h3>
+              <p class="feature-description">
+                Agentforce analyzes your Salesforce data (cases, opportunities, and engagement activities) to calculate a relationship health score, identify trends, and provide actionable insights with recommended next steps to strengthen account relationships.
+              </p>
+            </div>
+          </div>
+        </div>
+        <div class="feature-box">
+          <div class="slds-media">
+            <div class="slds-media__figure">
+              <div class="feature-icon-wrapper">
+                <lightning-icon
+                  icon-name="utility:company"
+                  size="small"
+                  class="feature-icon"
+                ></lightning-icon>
+              </div>
+            </div>
+            <div class="slds-media__body">
+              <h3 class="feature-title">Account Research</h3>
+              <p class="feature-description">
+                Agentforce crawls the web to find company overview, industry classification, headquarters location, key products and services, executive leadership, recent news, and growth indicators to help you understand your account better.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+      </div>
+    </lightning-card>
+
+    <!-- Content Section - Side by Side Layout -->
+    <div class="content-section">
+      <template lwc:if={selectedAccountId}>
+        <div class="components-grid">
+          <!-- Relationship Health Component -->
+          <div class="component-wrapper">
+            <c-account-relationship-health
+              account-id={selectedAccountId}
+              analysis-trigger={analysisTrigger}
+            ></c-account-relationship-health>
+          </div>
+
+          <!-- Account Research Component -->
+          <div class="component-wrapper">
+            <c-account-research
+              account-id={selectedAccountId}
+              analysis-trigger={analysisTrigger}
+            ></c-account-research>
+          </div>
+        </div>
+      </template>
+
+      <!-- Empty State -->
+      <template lwc:if={showEmptyState}>
+        <div class="empty-state">
+          <lightning-icon
+            icon-name="standard:account"
+            size="large"
+            class="empty-state-icon"
+          ></lightning-icon>
+          <h2 class="slds-text-heading_medium slds-m-top_medium">
+            Select an Account to Begin
+          </h2>
+          <p class="slds-text-body_regular slds-text-color_weak slds-m-top_small">
+            Choose an account from the dropdown above to analyze relationship
+            health and research account information
+          </p>
+        </div>
+      </template>
+    </div>
+  </div>
+</template>
+
